@@ -169,6 +169,39 @@ describe('config options', () => {
                 assert.equal(config.system.workers, 100500);
             });
         });
+
+        describe('diffColor', () => {
+            it('should be magenta by default', () => {
+                const config = createConfig();
+
+                assert.deepEqual(config.system.diffColor, '#ff00ff');
+            });
+
+            it('should override diffColor option', () => {
+                const readConfig = _.set({}, 'system.diffColor', '#f5f5f5');
+                Config.read.returns(readConfig);
+
+                const config = createConfig();
+
+                assert.equal(config.system.diffColor, '#f5f5f5');
+            });
+
+            it('should throw error if option is not a string', () => {
+                const readConfig = _.set({}, 'system.diffColor', 1);
+
+                Config.read.returns(readConfig);
+
+                assert.throws(() => createConfig(), Error, '"diffColor" must be a string');
+            });
+
+            it('should throw error if option is not a hexadecimal value', () => {
+                const readConfig = _.set({}, 'system.diffColor', '#gggggg');
+
+                Config.read.returns(readConfig);
+
+                assert.throws(() => createConfig(), Error, /"diffColor" must be a hexadecimal/);
+            });
+        });
     });
 
     describe('prepareEnvironment', () => {
