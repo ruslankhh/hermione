@@ -310,31 +310,31 @@ describe('config browser-options', () => {
         });
     });
 
-    describe('screenshotDir', () => {
+    describe('screenshotsDir', () => {
         beforeEach(() => sandbox.stub(process, 'cwd').returns('/default/path'));
 
-        it('should set default screenshotDir option if it does not set in config', () => {
+        it('should set default screenshotsDir option if it does not set in config', () => {
             const config = createConfig();
 
-            assert.equal(config.screenshotDir, `/default/path/${defaults.screenshotDir}`);
+            assert.equal(config.screenshotsDir, `/default/path/${defaults.screenshotsDir}`);
         });
 
-        it('should throw error if screenshotDir is not a string or function', () => {
+        it('should throw error if screenshotsDir is not a string or function', () => {
             const readConfig = {
                 browsers: {
-                    b1: mkBrowser_({screenshotDir: ['Array']})
+                    b1: mkBrowser_({screenshotsDir: ['Array']})
                 }
             };
 
             Config.read.returns(readConfig);
 
-            assert.throws(() => createConfig(), Error, '"screenshotDir" must be a string or function');
+            assert.throws(() => createConfig(), Error, '"screenshotsDir" must be a string or function');
         });
 
-        it('should set screenshotDir option to all browsers relative to project dir', () => {
-            const screenshotDir = 'some/dir';
+        it('should set screenshotsDir option to all browsers relative to project dir', () => {
+            const screenshotsDir = 'some/dir';
             const readConfig = {
-                screenshotDir,
+                screenshotsDir,
                 browsers: {
                     b1: mkBrowser_(),
                     b2: mkBrowser_()
@@ -346,17 +346,17 @@ describe('config browser-options', () => {
 
             const config = createConfig();
 
-            assert.equal(config.browsers.b1.screenshotDir, '/project_dir/some/dir');
-            assert.equal(config.browsers.b2.screenshotDir, '/project_dir/some/dir');
+            assert.equal(config.browsers.b1.screenshotsDir, '/project_dir/some/dir');
+            assert.equal(config.browsers.b2.screenshotsDir, '/project_dir/some/dir');
         });
 
-        it('should override screenshotDir option relative to project dir', () => {
-            const screenshotDir = 'some/dir';
+        it('should override screenshotsDir option relative to project dir', () => {
+            const screenshotsDir = 'some/dir';
             const readConfig = {
-                screenshotDir,
+                screenshotsDir,
                 browsers: {
                     b1: mkBrowser_(),
-                    b2: mkBrowser_({screenshotDir: './screens'})
+                    b2: mkBrowser_({screenshotsDir: './screens'})
                 }
             };
 
@@ -365,8 +365,8 @@ describe('config browser-options', () => {
 
             const config = createConfig();
 
-            assert.equal(config.browsers.b1.screenshotDir, '/project_dir/some/dir');
-            assert.equal(config.browsers.b2.screenshotDir, '/project_dir/screens');
+            assert.equal(config.browsers.b1.screenshotsDir, '/project_dir/some/dir');
+            assert.equal(config.browsers.b2.screenshotsDir, '/project_dir/screens');
         });
     });
 
