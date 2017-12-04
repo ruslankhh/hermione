@@ -311,12 +311,10 @@ describe('config browser-options', () => {
     });
 
     describe('screenshotsDir', () => {
-        beforeEach(() => sandbox.stub(process, 'cwd').returns('/default/path'));
-
         it('should set default screenshotsDir option if it does not set in config', () => {
             const config = createConfig();
 
-            assert.equal(config.screenshotsDir, `/default/path/${defaults.screenshotsDir}`);
+            assert.equal(config.screenshotsDir, defaults.screenshotsDir);
         });
 
         it('should throw error if screenshotsDir is not a string or function', () => {
@@ -331,8 +329,8 @@ describe('config browser-options', () => {
             assert.throws(() => createConfig(), Error, '"screenshotsDir" must be a string or function');
         });
 
-        it('should set screenshotsDir option to all browsers relative to project dir', () => {
-            const screenshotsDir = 'some/dir';
+        it('should set screenshotsDir option to all browsers', () => {
+            const screenshotsDir = '/some/dir';
             const readConfig = {
                 screenshotsDir,
                 browsers: {
@@ -341,32 +339,30 @@ describe('config browser-options', () => {
                 }
             };
 
-            process.cwd.returns('/project_dir');
             Config.read.returns(readConfig);
 
             const config = createConfig();
 
-            assert.equal(config.browsers.b1.screenshotsDir, '/project_dir/some/dir');
-            assert.equal(config.browsers.b2.screenshotsDir, '/project_dir/some/dir');
+            assert.equal(config.browsers.b1.screenshotsDir, '/some/dir');
+            assert.equal(config.browsers.b2.screenshotsDir, '/some/dir');
         });
 
-        it('should override screenshotsDir option relative to project dir', () => {
-            const screenshotsDir = 'some/dir';
+        it('should override screenshotsDir option per browser', () => {
+            const screenshotsDir = '/some/dir';
             const readConfig = {
                 screenshotsDir,
                 browsers: {
                     b1: mkBrowser_(),
-                    b2: mkBrowser_({screenshotsDir: './screens'})
+                    b2: mkBrowser_({screenshotsDir: '/screens'})
                 }
             };
 
-            process.cwd.returns('/project_dir');
             Config.read.returns(readConfig);
 
             const config = createConfig();
 
-            assert.equal(config.browsers.b1.screenshotsDir, '/project_dir/some/dir');
-            assert.equal(config.browsers.b2.screenshotsDir, '/project_dir/screens');
+            assert.equal(config.browsers.b1.screenshotsDir, '/some/dir');
+            assert.equal(config.browsers.b2.screenshotsDir, '/screens');
         });
     });
 
