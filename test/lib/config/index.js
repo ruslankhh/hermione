@@ -45,6 +45,27 @@ describe('config', () => {
         it('should extend config with a config path', () => {
             assert.include(initConfig({configPath: 'config-path'}), {configPath: 'config-path'});
         });
+
+        it('should extend each browser config with current system configuration', () => {
+            const config = initConfig({
+                configParserReturns: {
+                    browsers: {
+                        bro1: {},
+                        bro2: {}
+                    },
+                    system: 'bla'
+                }
+            });
+
+            assert.include(config.forBrowser('bro1'), {system: 'bla'});
+            assert.include(config.forBrowser('bro2'), {system: 'bla'});
+        });
+
+        it('should extend browser config with its id', () => {
+            const config = initConfig({configParserReturns: {browsers: {bro: {some: 'option'}}}});
+
+            assert.include(config.forBrowser('bro'), {id: 'bro'});
+        });
     });
 
     describe('forBrowser', () => {
@@ -52,12 +73,6 @@ describe('config', () => {
             const config = initConfig({configParserReturns: {browsers: {bro: {some: 'option'}}}});
 
             assert.include(config.forBrowser('bro'), {some: 'option'});
-        });
-
-        it('should extend browser config with its id', () => {
-            const config = initConfig({configParserReturns: {browsers: {bro: {some: 'option'}}}});
-
-            assert.include(config.forBrowser('bro'), {id: 'bro'});
         });
     });
 
