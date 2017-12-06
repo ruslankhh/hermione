@@ -26,7 +26,7 @@ describe('BrowserConfig', () => {
     });
 
     describe('getScreenshotPath', () => {
-        const test = {hashedFullTitle: () => '12345'};
+        const test = {id: () => '12345'};
 
         it('should return full screenshot path for current test state', () => {
             const config = new BrowserConfig('bro', {screenshotsDir: 'scrs'});

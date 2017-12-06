@@ -5,7 +5,8 @@ const q = require('q');
 const _ = require('lodash');
 const BrowserAgent = require('gemini-core').BrowserAgent;
 const proxyquire = require('proxyquire').noCallThru();
-const logger = require('../../../../lib/utils').logger;
+const utils = require('../../../../lib/utils');
+const {logger} = utils;
 const SkipBuilder = require('../../../../lib/runner/mocha-runner/skip/skip-builder');
 const OnlyBuilder = require('../../../../lib/runner/mocha-runner/skip/only-builder');
 const Skip = require('../../../../lib/runner/mocha-runner/skip/');
@@ -41,6 +42,7 @@ describe('mocha-runner/mocha-adapter', () => {
 
         clearRequire = sandbox.stub().named('clear-require');
         proxyReporter = sandbox.stub().named('proxy-reporter');
+        sandbox.stub(utils, 'getShortMD5');
         MochaAdapter = proxyquire('../../../../lib/runner/mocha-runner/mocha-adapter', {
             'clear-require': clearRequire,
             'mocha': MochaStub,
@@ -298,6 +300,27 @@ describe('mocha-runner/mocha-adapter', () => {
                     assert.calledOnce(testSpy);
                     assert.calledWithMatch(testSpy.firstCall, {title: 'test1'});
                 });
+        });
+    });
+
+    describe('extend test API', () => {
+        it('should add "id" method for test', () => {
+            mkMochaAdapter_();
+            MochaStub.lastInstance.updateSuiteTree((suite) => suite.addTest(new MochaStub.Test()));
+
+            const test = MochaStub.lastInstance.suite.tests[0];
+
+            assert.isFunction(test.id);
+        });
+
+        it('should generate uniq id for test by calling "id" method', () => {
+            utils.getShortMD5.returns('12345');
+            mkMochaAdapter_();
+            MochaStub.lastInstance.updateSuiteTree((suite) => suite.addTest(new MochaStub.Test()));
+
+            const test = MochaStub.lastInstance.suite.tests[0];
+
+            assert.equal(test.id(), '12345');
         });
     });
 

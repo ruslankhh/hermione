@@ -54,6 +54,7 @@
     "worker-farm": "git://github.com/gemini-testing/node-worker-farm.git#release/feat/broadcast"
   },
   "devDependencies": {
+    "app-module-path": "^2.2.0",
     "bluebird": "^3.5.1",
     "chai": "^4.1.1",
     "chai-as-promised": "^7.1.1",
