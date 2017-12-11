@@ -171,7 +171,7 @@ describe('config options', () => {
         });
 
         describe('diffColor', () => {
-            it('should be magenta by default', () => {
+            it('should be #ff00ff by default', () => {
                 const config = createConfig();
 
                 assert.deepEqual(config.system.diffColor, '#ff00ff');
@@ -186,7 +186,7 @@ describe('config options', () => {
                 assert.equal(config.system.diffColor, '#f5f5f5');
             });
 
-            it('should throw error if option is not a string', () => {
+            it('should throw an error if option is not a string', () => {
                 const readConfig = _.set({}, 'system.diffColor', 1);
 
                 Config.read.returns(readConfig);
@@ -194,7 +194,7 @@ describe('config options', () => {
                 assert.throws(() => createConfig(), Error, '"diffColor" must be a string');
             });
 
-            it('should throw error if option is not a hexadecimal value', () => {
+            it('should throw an error if option is not a hexadecimal value', () => {
                 const readConfig = _.set({}, 'system.diffColor', '#gggggg');
 
                 Config.read.returns(readConfig);

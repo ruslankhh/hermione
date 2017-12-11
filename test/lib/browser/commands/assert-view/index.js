@@ -6,15 +6,19 @@ const temp = require('temp');
 const Image = require('lib/browser/commands/assert-view/image');
 const NoRefImageError = require('lib/browser/commands/assert-view/errors/no-ref-image-error');
 const ImageDiffError = require('lib/browser/commands/assert-view/errors/image-diff-error');
-const {mkBrowser_, makeSessionStub_} = require('../../utils');
+const {mkBrowser_, mkSessionStub_} = require('../../utils');
 
 describe('assertView command', () => {
     const sandbox = sinon.sandbox.create();
-    const initBrowser = () => mkBrowser_().init();
     let session, imageStub;
+    const assertView = (config) => {
+        return mkBrowser_(config)
+            .init()
+            .then(() => session.assertView());
+    };
 
     beforeEach(() => {
-        session = makeSessionStub_(sandbox);
+        session = mkSessionStub_(sandbox);
         session.screenshot = sandbox.stub().named('screenshot').resolves({value: 'base64hash'});
         session.executionContext = {};
         sandbox.stub(webdriverio, 'remote').returns(session);
@@ -34,38 +38,32 @@ describe('assertView command', () => {
             Image.compare.resolves(true);
         });
 
-        it('should take screenshot', () => {
-            return initBrowser()
-                .then(() => session.assertView('plain'))
-                .then(() => assert.calledOnceWith(session.screenshot));
+        it('should take a screenshot', () => {
+            return assertView()
+                .then(() => assert.calledOnce(session.screenshot));
         });
 
-        it('should convert captured screenshot from base64', () => {
-            return initBrowser()
-                .then(() => session.assertView('plain'))
+        it('should create Image instance from captured screenshot', () => {
+            return assertView()
                 .then(() => assert.calledOnceWith(Image.fromBase64, 'base64hash'));
         });
 
-        it('should save captured screenshot', () => {
+        it('should save a captured screenshot', () => {
             temp.path.returns('/curr/path');
 
-            return initBrowser()
-                .then(() => session.assertView('plain'))
+            return assertView()
                 .then(() => assert.calledOnceWith(imageStub.save, '/curr/path'));
         });
     });
 
-    it('should fail with "NoRefImageError" error if there are no reference image to compare with', () => {
+    it('should fail with "NoRefImageError" error if there is no reference image', () => {
         fs.existsSync.returns(false);
 
-        return assert.isRejected(
-            initBrowser().then(() => session.assertView('plain')),
-            NoRefImageError
-        );
+        return assert.isRejected(assertView(), NoRefImageError);
     });
 
     describe('image compare', () => {
-        const mkConfig = (opts = {}) => {
+        const mkConfig_ = (opts = {}) => {
             return Object.assign({
                 getScreenshotPath: () => '/some/path',
                 system: {diffColor: '#ffffff'}
@@ -76,17 +74,15 @@ describe('assertView command', () => {
             fs.existsSync.returns(true);
         });
 
-        it('should compare current image with reference', () => {
-            Image.compare.resolves(true);
-            temp.path.returns('/curr/path');
-            const config = mkConfig({
+        it('should compare a current image with a reference', () => {
+            const config = mkConfig_({
                 getScreenshotPath: () => '/ref/path',
                 tolerance: 100
             });
+            Image.compare.resolves(true);
+            temp.path.returns('/curr/path');
 
-            return mkBrowser_(config)
-                .init()
-                .then(() => session.assertView('plain'))
+            return assertView(config)
                 .then(() => {
                     assert.calledOnceWith(Image.compare, '/ref/path', '/curr/path', {tolerance: 100});
                 });
@@ -99,34 +95,24 @@ describe('assertView command', () => {
             });
 
             it('should fail with "ImageDiffError" error', () => {
-                const assertView = () => {
-                    return mkBrowser_(mkConfig())
-                        .init()
-                        .then(() => session.assertView('plain'));
-                };
-
-                return assert.isRejected(assertView(), ImageDiffError);
+                return assert.isRejected(assertView(mkConfig_()), ImageDiffError);
             });
 
-            it('should extend error with buildDiff function', () => {
-                return mkBrowser_(mkConfig())
-                    .init()
-                    .then(() => session.assertView('plain'))
+            it('should extend an error with buildDiff function', () => {
+                return assertView(mkConfig_())
                     .catch((error) => {
                         assert.isFunction(error.saveDiffTo);
                     });
             });
 
-            describe('function to build diff image', () => {
+            describe('build image diff function', () => {
                 const saveDiff = (diffPath = '/diff/path', config) => {
-                    return mkBrowser_(config)
-                        .init()
-                        .then(() => session.assertView('plain'))
+                    return assertView(config)
                         .catch((error) => error.saveDiffTo(diffPath));
                 };
 
-                it('should build diff with passed image paths', () => {
-                    const config = mkConfig({getScreenshotPath: () => '/reference/path'});
+                it('should build diff for passed image paths', () => {
+                    const config = mkConfig_({getScreenshotPath: () => '/reference/path'});
                     temp.path.returns('/current/path');
 
                     return saveDiff('/diff/path', config)
@@ -139,7 +125,7 @@ describe('assertView command', () => {
                         });
                 });
 
-                it('should pass to function compare options from browser', () => {
+                it('should build diff with passed compare options', () => {
                     const config = {
                         tolerance: 100,
                         system: {diffColor: '#111111'}

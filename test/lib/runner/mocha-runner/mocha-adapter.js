@@ -5,13 +5,13 @@ const q = require('q');
 const _ = require('lodash');
 const BrowserAgent = require('gemini-core').BrowserAgent;
 const proxyquire = require('proxyquire').noCallThru();
-const utils = require('../../../../lib/utils');
+const utils = require('lib/utils');
 const {logger} = utils;
-const SkipBuilder = require('../../../../lib/runner/mocha-runner/skip/skip-builder');
-const OnlyBuilder = require('../../../../lib/runner/mocha-runner/skip/only-builder');
-const Skip = require('../../../../lib/runner/mocha-runner/skip/');
-const TestSkipper = require('../../../../lib/runner/test-skipper');
-const RunnerEvents = require('../../../../lib/constants/runner-events');
+const SkipBuilder = require('lib/runner/mocha-runner/skip/skip-builder');
+const OnlyBuilder = require('lib/runner/mocha-runner/skip/only-builder');
+const Skip = require('lib/runner/mocha-runner/skip/');
+const TestSkipper = require('lib/runner/test-skipper');
+const RunnerEvents = require('lib/constants/runner-events');
 const MochaStub = require('../../_mocha');
 
 describe('mocha-runner/mocha-adapter', () => {
@@ -42,7 +42,7 @@ describe('mocha-runner/mocha-adapter', () => {
 
         clearRequire = sandbox.stub().named('clear-require');
         proxyReporter = sandbox.stub().named('proxy-reporter');
-        sandbox.stub(utils, 'getShortMD5');
+        sandbox.stub(utils.mocha, 'getShortMD5');
         MochaAdapter = proxyquire('../../../../lib/runner/mocha-runner/mocha-adapter', {
             'clear-require': clearRequire,
             'mocha': MochaStub,
@@ -314,7 +314,7 @@ describe('mocha-runner/mocha-adapter', () => {
         });
 
         it('should generate uniq id for test by calling "id" method', () => {
-            utils.getShortMD5.returns('12345');
+            utils.mocha.getShortMD5.returns('12345');
             mkMochaAdapter_();
             MochaStub.lastInstance.updateSuiteTree((suite) => suite.addTest(new MochaStub.Test()));
 

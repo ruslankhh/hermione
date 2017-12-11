@@ -4,14 +4,14 @@ const q = require('q');
 const webdriverio = require('webdriverio');
 const logger = require('lib/utils').logger;
 const signalHandler = require('lib/signal-handler');
-const {mkBrowser_, makeSessionStub_} = require('./utils');
+const {mkBrowser_, mkSessionStub_} = require('./utils');
 
 describe('Browser', () => {
     const sandbox = sinon.sandbox.create();
     let session;
 
     beforeEach(() => {
-        session = makeSessionStub_(sandbox);
+        session = mkSessionStub_(sandbox);
         sandbox.stub(webdriverio, 'remote');
         sandbox.stub(logger);
         webdriverio.remote.returns(session);

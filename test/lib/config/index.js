@@ -2,7 +2,8 @@
 
 const path = require('path');
 const proxyquire = require('proxyquire').noCallThru();
-const defaults = require('../../../lib/config/defaults');
+const defaults = require('lib/config/defaults');
+const BrowserConfig = require('lib/config/browser-config');
 
 describe('config', () => {
     const sandbox = sinon.sandbox.create();
@@ -46,19 +47,16 @@ describe('config', () => {
             assert.include(initConfig({configPath: 'config-path'}), {configPath: 'config-path'});
         });
 
-        it('should extend each browser config with current system configuration', () => {
+        it('should wrap browser config with "BrowserConfig" instance', () => {
             const config = initConfig({
                 configParserReturns: {
                     browsers: {
-                        bro1: {},
-                        bro2: {}
-                    },
-                    system: 'bla'
+                        bro1: {}
+                    }
                 }
             });
 
-            assert.include(config.forBrowser('bro1'), {system: 'bla'});
-            assert.include(config.forBrowser('bro2'), {system: 'bla'});
+            assert.instanceOf(config.forBrowser('bro1'), BrowserConfig);
         });
 
         it('should extend browser config with its id', () => {

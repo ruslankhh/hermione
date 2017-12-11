@@ -1,10 +1,11 @@
 'use strict';
 
 const _ = require('lodash');
+const q = require('q');
 const Browser = require('../../../lib/browser');
 
-function createBrowserConfig_(opts) {
-    const browser = _.defaults(opts || {}, {
+function createBrowserConfig_(opts = {}) {
+    const browser = _.defaults(opts, {
         desiredCapabilities: {browserName: 'browser'},
         baseUrl: 'http://base_url',
         gridUrl: 'http://test_host:4444/wd/hub',
@@ -15,7 +16,8 @@ function createBrowserConfig_(opts) {
         sessionRequestTimeout: null,
         sessionQuitTimeout: null,
         windowSize: null,
-        getScreenshotPath: () => '/some/path'
+        getScreenshotPath: () => '/some/path',
+        system: opts.system || {}
     });
 
     return {
@@ -30,8 +32,8 @@ exports.mkBrowser_ = (opts) => {
     return new Browser(createBrowserConfig_(opts), 'browser');
 };
 
-exports.makeSessionStub_ = (sandbox) => {
-    const session = Promise.resolve();
+exports.mkSessionStub_ = (sandbox) => {
+    const session = q();
     session.init = sandbox.stub().named('init').returns(session);
     session.end = sandbox.stub().named('end').resolves();
     session.url = sandbox.stub().named('url').returns(session);
