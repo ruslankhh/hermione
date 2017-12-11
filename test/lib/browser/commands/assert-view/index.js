@@ -17,11 +17,29 @@ describe('assertView command', () => {
             .then(() => session.assertView());
     };
 
-    beforeEach(() => {
+    const ass = (config = {}) => {
         session = mkSessionStub_(sandbox);
         session.screenshot = sandbox.stub().named('screenshot').resolves({value: 'base64hash'});
         session.executionContext = {};
         sandbox.stub(webdriverio, 'remote').returns(session);
+
+        return mkBrowser_(config)
+            .init()
+            .then((browser) => {
+                // console.log(browser.publicAPI);
+                return browser.id;
+            })
+            .then((res) => {
+                console.log(res);
+                return res;
+            });
+    };
+
+    beforeEach(() => {
+        // session = mkSessionStub_(sandbox);
+        // session.screenshot = sandbox.stub().named('screenshot').resolves({value: 'base64hash'});
+        // session.executionContext = {};
+        // sandbox.stub(webdriverio, 'remote').returns(session);
         imageStub = {save: sandbox.stub().named('save')};
         sandbox.stub(Image, 'fromBase64').resolves(imageStub);
         sandbox.stub(Image, 'compare');
@@ -38,9 +56,12 @@ describe('assertView command', () => {
             Image.compare.resolves(true);
         });
 
-        it('should take a screenshot', () => {
-            return assertView()
-                .then(() => assert.calledOnce(session.screenshot));
+        it.only('should take a screenshot', () => {
+            return ass()
+                .then((session) => {
+                    console.log(session);
+                });
+                // .then((session) => assert.calledOnce(session.screenshot));
         });
 
         it('should create Image instance from captured screenshot', () => {
